@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 import sqlite3
+from tkinter import messagebox
 
 # 2. Создаём окошко интерфейса:
 app = tk.Tk()
@@ -63,12 +64,34 @@ def add_order():
     # Обновляем отображение заказов
     view_orders()
 
+def complete_order():
+    selected_item = tree.selection()
+
+    if selected_item:
+        order_id = tree.item(selected_item, 'values')[0]
+
+        conn = sqlite3.connect('business_orders.db')
+        cur = conn.cursor()
+
+        cur.execute("UPDATE orders SET status='Завершён' WHERE id=?", (order_id,))
+
+        conn.commit()
+        conn.close()
+
+        view_orders()
+    else:
+        messagebox.showwarning("Предупреждение", "Выберите заказ для завершения")
+
 
 # 7. Создаем кнопку добавления заказа
 add_button = tk.Button(app, text="Добавить заказ", command=add_order)
 add_button.pack()
 
-# 8. Создаем функцию вывода текущих заказов
+# 8.Создаем кнопку завершения заказа
+complete_button = tk.Button(app, text="Завершить заказ", command=complete_order)
+complete_button.pack()
+
+# 9. Создаем функцию вывода текущих заказов
 def view_orders():
     # Очищаем таблицу перед обновлением
     for i in tree.get_children():
@@ -82,7 +105,7 @@ def view_orders():
         tree.insert("", tk.END, values=row)
     conn.close()
 
-# 9. Отображаем текущие заказы при запуске
+# 10. Создаем функцию завершения заказа по ID  Отображаем текущие заказы при запуске
 view_orders()
 
 # Запускаем главный цикл приложения
